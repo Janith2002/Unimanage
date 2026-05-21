@@ -1,0 +1,24 @@
+@model UniManageSystem.Models.Message
+
+@{
+    ViewData["Title"] = "Read Message";
+}
+
+<div class="container mt-4 card shadow p-4">
+    <div class="d-flex justify-content-between">
+        <h3>@Model.Subject</h3>
+        <span class="text-muted">@Model.SentDate.ToLocalTime()</span>
+    </div>
+    <hr />
+    <p><strong>From:</strong> @(Model.Sender?.FirstName) @(Model.Sender?.LastName)</p>
+    <p><strong>To:</strong> @(Model.Receiver?.FirstName) @(Model.Receiver?.LastName)</p>
+    
+    <div class="mt-4 p-3 bg-light rounded border" style="white-space: pre-wrap; word-wrap: break-word;">
+        @Model.Content
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Inbox" class="btn btn-secondary">Back to Inbox</a>
+        <a asp-action="Sent" class="btn btn-outline-secondary">Go to Sent</a>
+    </div>
+</div>

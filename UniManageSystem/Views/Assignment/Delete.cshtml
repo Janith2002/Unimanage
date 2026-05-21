@@ -1,0 +1,37 @@
+@model UniManageSystem.Models.Assignment
+
+@{
+    ViewData["Title"] = "Delete Assignment";
+}
+
+<div class="row align-items-center justify-content-center" style="min-height: 60vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="card-header bg-danger text-white p-4 border-0 text-center">
+                <i class="fa-solid fa-triangle-exclamation display-3 mb-3 text-white-50"></i>
+                <h3 class="mb-0 fw-bold">Delete Assignment</h3>
+            </div>
+            
+            <div class="card-body p-4 p-md-5 bg-white text-center">
+                <p class="fs-5 text-dark mb-4">Are you sure you want to delete <strong class="text-danger">@Model.Title</strong>?</p>
+                <div class="alert alert-warning mb-4 py-3 border-0 bg-warning bg-opacity-10 text-warning-emphasis rounded-3">
+                    <i class="fa-solid fa-circle-info me-2"></i> This action cannot be undone. All related submissions and grading will also be deleted from the system.
+                </div>
+                
+                <h4 class="text-muted fw-normal">@Model.Course?.Title</h4>
+                <p class="text-muted small mb-0"><i class="fa-regular fa-clock me-1"></i> Due: @Model.DueDate.ToShortDateString() @Model.DueDate.ToShortTimeString()</p>
+                <div class="fs-5 fw-bold text-dark mt-2 mb-4">Max Score: @Model.MaxScore.ToString("0.00") pts</div>
+
+                <div class="d-flex justify-content-center gap-3 mt-4 pt-4 border-top">
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <button type="submit" class="btn btn-danger rounded-pill px-5 shadow-sm py-2 fw-semibold">
+                            <i class="fa-solid fa-trash me-2"></i> Confirm Delete
+                        </button>
+                    </form>
+                    <a asp-action="CourseAssignments" class="btn btn-light text-muted border border-1 border-light shadow-sm rounded-pill px-4 py-2 fw-semibold">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

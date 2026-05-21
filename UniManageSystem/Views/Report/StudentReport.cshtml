@@ -1,0 +1,191 @@
+@model UniManageSystem.ViewModels.StudentReportViewModel
+@{
+    ViewData["Title"] = "My Performance Report";
+}
+
+<div class="page-header mt-2">
+    <div>
+        <h2 class="page-title mb-1">Performance Analytics</h2>
+        <p class="text-muted mb-0">Your core academic evaluation record</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="window.print()">
+            <i class="fa-solid fa-print me-2"></i> Generate PDF
+        </button>
+    </div>
+</div>
+
+<!-- Summary Head -->
+<div class="row mb-4 mt-2">
+    <div class="col-md-12">
+        <div class="card border-0 shadow-sm rounded-4 @(Model.OverallAverage >= 60 ? "bg-success" : "bg-danger") bg-opacity-10 py-2">
+            <div class="card-body text-center py-5 position-relative overflow-hidden">
+                <i class="fa-solid fa-ranking-star position-absolute text-white opacity-25" style="font-size: 8rem; right: 5%; top: -10%;"></i>
+                <h5 class="text-muted text-uppercase fw-bold tracing-wide mb-3" style="letter-spacing: 2px;">Cumulative GPA Snapshot</h5>
+                <h1 class="display-3 fw-bold @(Model.OverallAverage >= 60 ? "text-success" : "text-danger")">
+                    @Model.OverallAverage.ToString("0.00")
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Grades over time chart -->
+    <div class="col-md-8">
+        <div class="card shadow-sm h-100 border-0 rounded-4">
+            <div class="card-header bg-white border-bottom p-4">
+                <h6 class="m-0 fw-bold text-dark"><i class="fa-solid fa-arrow-trend-up text-primary me-2"></i> Submissions Trajectory</h6>
+            </div>
+            <div class="card-body p-4">
+                @if (Model.RecentSubmissions.Any())
+                {
+                    <canvas id="scoresChart" height="200"></canvas>
+                }
+                else
+                {
+                    <div class="border border-dashed rounded-3 p-5 text-center text-muted">
+                        <i class="fa-solid fa-chart-line fs-1 opacity-25 mb-3"></i>
+                        <p class="mb-0">No graded submissions processed into the analytics engine yet.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Final Grades Sidebar -->
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100 border-0 rounded-4">
+            <div class="card-header bg-white border-bottom p-4">
+                <h6 class="m-0 fw-bold text-dark"><i class="fa-solid fa-scroll text-primary me-2"></i> Active Transcript</h6>
+            </div>
+            <div class="card-body p-4">
+                @if (Model.CourseGrades.Any(c => c.FinalGrade.HasValue))
+                {
+                    <div class="mb-4">
+                        <canvas id="coursesPieChart" height="200"></canvas>
+                    </div>
+                }
+                
+                @if (Model.CourseGrades.Any())
+                {
+                    <div class="table-responsive rounded border mb-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <tbody>
+                                @foreach(var cg in Model.CourseGrades)
+                                {
+                                    <tr>
+                                        <td class="fw-medium text-dark py-3 px-3">
+                                             <i class="fa-regular fa-folder-open text-muted me-2 small"></i> @cg.CourseName
+                                        </td>
+                                        <td class="text-end px-3">
+                                            @if (cg.FinalGrade.HasValue)
+                                            {
+                                                <span class="badge @(cg.FinalGrade.Value >= 60 ? "bg-success bg-opacity-10 text-success border border-success border-opacity-25" : "bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25") rounded-pill px-3 py-1 shadow-sm">
+                                                    @cg.FinalGrade.Value.ToString("0.00")
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-muted border rounded-pill px-3 py-1 shadow-sm"><i class="fa-solid fa-clock opacity-50 me-1"></i> N/A</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted border border-dashed rounded-3">
+                        <i class="fa-solid fa-ban fs-3 opacity-25 mb-2"></i>
+                        <p class="mb-0 small">Not enrolled in any active courses.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        @if(Model.RecentSubmissions.Any())
+        {
+            <text>
+            const ctxScores = document.getElementById('scoresChart').getContext('2d');
+            new Chart(ctxScores, {
+                type: 'line',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.RecentSubmissions.Select(s => s.SubmissionDate.ToLocalTime().ToString("MMM dd")))),
+                    datasets: [{
+                        label: 'Earned Points',
+                        data: @Html.Raw(Json.Serialize(Model.RecentSubmissions.Select(s => s.Score))),
+                        borderColor: '#4F46E5', // Primary Indigo
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#4F46E5',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: { 
+                        y: { 
+                            beginAtZero: true,
+                            grid: { borderDash: [5, 5], color: '#e5e7eb' },
+                            border: { display: false }
+                        },
+                        x: {
+                            grid: { display: false },
+                            border: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+            </text>
+        }
+
+        @if(Model.CourseGrades.Any(c => c.FinalGrade.HasValue))
+        {
+            <text>
+            const ctxPie = document.getElementById('coursesPieChart').getContext('2d');
+            new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.CourseGrades.Where(c => c.FinalGrade.HasValue).Select(c => c.CourseName))),
+                    datasets: [{
+                        data: @Html.Raw(Json.Serialize(Model.CourseGrades.Where(c => c.FinalGrade.HasValue).Select(c => c.FinalGrade))),
+                        backgroundColor: [
+                            '#4F46E5', // Indigo
+                            '#3B82F6', // Blue
+                            '#10B981', // Emerald
+                            '#F59E0B', // Amber
+                            '#8B5CF6'  // Violet
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } }
+                    }
+                }
+            });
+            </text>
+        }
+    </script>
+}

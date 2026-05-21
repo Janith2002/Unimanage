@@ -1,0 +1,89 @@
+@model IEnumerable<UniManageSystem.Models.Message>
+
+@{
+    ViewData["Title"] = "Inbox";
+}
+
+<div class="page-header mt-2">
+    <div>
+        <h2 class="page-title mb-1">Messages</h2>
+        <p class="text-muted mb-0">Your communication inbox</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Send" class="btn btn-primary shadow-sm rounded-pill px-4">
+            <i class="fa-solid fa-pen-to-square me-2"></i> Compose
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4 overflow-hidden mt-4">
+    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 fw-bold text-dark"><i class="fa-solid fa-inbox text-primary me-2"></i> Inbox</h6>
+        <div class="btn-group shadow-sm">
+            <a asp-action="Inbox" class="btn btn-sm btn-primary active disabled">Inbox</a>
+            <a asp-action="Sent" class="btn btn-sm btn-light border">Sent</a>
+        </div>
+    </div>
+    <div class="table-responsive m-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th style="width: 50px;" class="text-center">#</th>
+                    <th>Sender</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th class="text-end pe-4">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="@(item.IsRead ? "" : "bg-primary bg-opacity-10")">
+                        <td class="text-center">
+                            @if(item.IsRead) {
+                                <i class="fa-regular fa-envelope-open text-muted"></i>
+                            } else {
+                                <i class="fa-solid fa-envelope text-primary"></i>
+                            }
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center fw-bold text-dark" style="width: 35px; height: 35px;">
+                                    @(item.Sender?.FirstName?.Substring(0, 1) ?? "U")
+                                </div>
+                                <span class="fw-medium text-dark @(item.IsRead ? "" : "fw-bold")">@(item.Sender?.FirstName) @(item.Sender?.LastName)</span>
+                            </div>
+                        </td>
+                        <td>
+                            <a asp-action="Read" asp-route-id="@item.Id" class="text-decoration-none text-dark @(item.IsRead ? "text-muted" : "fw-bold")">
+                                @item.Subject
+                            </a>
+                        </td>
+                        <td class="text-muted small">
+                            <i class="fa-regular fa-clock me-1"></i> @item.SentDate.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")
+                        </td>
+                        <td class="text-end pe-4">
+                            @if (item.IsRead)
+                            {
+                                <span class="badge bg-light text-muted border px-3 py-2 rounded-pill shadow-sm"><i class="fa-solid fa-check me-1"></i> Read</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-primary px-3 py-2 rounded-pill shadow-sm"><i class="fa-solid fa-circle text-white opacity-75 ms-1 small" style="font-size: 0.5em; vertical-align: middle;"></i> New</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                
+                @if(!Model.Any()){
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="fa-regular fa-folder-open fs-1 mb-3 opacity-50"></i>
+                            <p class="mb-0">Your inbox is empty.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

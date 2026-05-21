@@ -1,0 +1,167 @@
+@model UniManageSystem.ViewModels.LecturerReportViewModel
+@{
+    ViewData["Title"] = "Lecturer Report";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Course Logistics & Analytics</h2>
+        <button class="btn btn-outline-primary" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print / Save PDF
+        </button>
+    </div>
+
+    @if (!Model.CoursePerformances.Any())
+    {
+        <div class="alert alert-secondary text-center p-5">
+            <h5>You currently have no courses with data.</h5>
+        </div>
+    }
+
+    @for (int i = 0; i < Model.CoursePerformances.Count; i++)
+    {
+        var course = Model.CoursePerformances[i];
+        <div class="card shadow-sm mb-5 border-0">
+            <div class="card-header bg-primary text-white pt-3 pb-3 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold">@course.CourseName</h4>
+                <div>
+                    <span class="badge bg-white text-primary me-2 shadow-sm fs-6 px-3 py-2 rounded-pill">Students: @course.EnrolledStudents</span>
+                    <span class="badge shadow-sm fs-6 px-3 py-2 rounded-pill" style="background-color: #F59E0B; color: #1F2937;">Course Avg: @course.AverageCourseGrade.ToString("0.00")</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row pt-4 px-2 pb-2">
+                    <!-- Assignment Averages Chart -->
+                    <div class="col-lg-7 border-end border-light-subtle pe-lg-5 mb-4 mb-lg-0">
+                        <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                            <i class="fa-solid fa-chart-bar text-primary fs-5 me-2"></i>
+                            <h5 class="text-secondary fw-bold mb-0" style="letter-spacing: -0.5px;">Assignment Metric Scale</h5>
+                        </div>
+                        
+                        <div class="bg-light bg-opacity-50 rounded-4 p-3" style="position: relative; height: 300px; width: 100%;">
+                            @if (course.AssignmentAverages.Any())
+                            {
+                                <canvas id="chart-assign-@i"></canvas>
+                            }
+                            else
+                            {
+                                <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                                    <i class="fa-solid fa-chart-line fs-1 opacity-25 mb-3"></i>
+                                    <span>No assignments published linking to analytics.</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Student Grades List -->
+                    <div class="col-lg-5 ps-lg-5">
+                        <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                            <i class="fa-solid fa-users text-primary fs-5 me-2"></i>
+                            <h5 class="text-secondary fw-bold mb-0" style="letter-spacing: -0.5px;">Student Ledger</h5>
+                        </div>
+                        
+                        <div class="table-responsive rounded-3 border">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="text-uppercase text-muted fw-semibold py-3 ps-4" style="font-size: 0.75rem; letter-spacing: 1px;">Student</th>
+                                        <th class="text-uppercase text-muted fw-semibold text-end py-3 pe-4" style="font-size: 0.75rem; letter-spacing: 1px;">Final Aggregated Grade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(var s in course.StudentGrades)
+                                    {
+                                        <tr>
+                                            <td class="ps-4 py-3 fw-medium text-dark">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">
+                                                        <i class="fa-regular fa-user small"></i>
+                                                    </div>
+                                                    @s.StudentName
+                                                </div>
+                                            </td>
+                                            <td class="text-end pe-4 py-3">
+                                                @if(s.FinalGrade.HasValue)
+                                                {
+                                                    <span class="badge @(s.FinalGrade.Value >= 60 ? "bg-success" : "bg-danger") bg-opacity-10 text-@(s.FinalGrade.Value >= 60 ? "success" : "danger") border border-@(s.FinalGrade.Value >= 60 ? "success" : "danger") border-opacity-25 rounded-pill px-3 py-2 fw-bold" style="font-size: 0.85rem;">
+                                                        @s.FinalGrade.Value.ToString("0.0")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-2 fw-medium shadow-none">Awaiting Evaluation</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                    @if (!course.StudentGrades.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="2" class="text-muted text-center py-5">
+                                                <i class="fa-solid fa-users-slash fs-2 opacity-25 mb-2 d-block"></i>
+                                                No enrolled students
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        @for (int i = 0; i < Model.CoursePerformances.Count; i++)
+        {
+            var course = Model.CoursePerformances[i];
+            if (course.AssignmentAverages.Any())
+            {
+                <text>
+                new Chart(document.getElementById('chart-assign-@i').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: @Html.Raw(Json.Serialize(course.AssignmentAverages.Select(a => a.AssignmentTitle))),
+                        datasets: [{
+                            label: 'Average Score',
+                            data: @Html.Raw(Json.Serialize(course.AssignmentAverages.Select(a => a.AverageScore))),
+                            backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                            borderColor: '#2563EB',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                            barPercentage: 0.6
+                        }]
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        scales: { 
+                            y: { 
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { 
+                                backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                                padding: 10,
+                                titleFont: { size: 13 },
+                                bodyFont: { size: 14 }
+                            }
+                        }
+                    }
+                });
+                </text>
+            }
+        }
+    </script>
+}

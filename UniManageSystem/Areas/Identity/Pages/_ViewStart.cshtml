@@ -1,0 +1,7 @@
+﻿@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+    if (ViewData["IsAuthPage"] != null && (bool)ViewData["IsAuthPage"] == true)
+    {
+        Layout = null; // Remove the standard layout (sidebar/header) strictly for login and register.
+    }
+}

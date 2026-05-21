@@ -1,0 +1,168 @@
+@model UniManageSystem.ViewModels.StudentDashboardViewModel
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<div class="page-header mt-2">
+    <h2 class="page-title">Welcome back, Student!</h2>
+    <div class="d-flex gap-2">
+        <a asp-controller="Enrollment" asp-action="MyCourses" class="btn btn-primary shadow-sm rounded-pill px-3">
+            <i class="fa-solid fa-book-open"></i> My Classes
+        </a>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4">
+    <!-- Stat Card 1 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="stat-details">
+                    <p>Active Enrollments</p>
+                    <h3>@Model.EnrolledCoursesCount</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat Card 2 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+                <div class="stat-details">
+                    <p>Pending Assessments</p>
+                    <h3>@Model.PendingAssignmentsCount</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat Card 3 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <div class="stat-details">
+                    <p>Cumulative Average</p>
+                    <h3>@Model.AverageGrade.ToString("0.00")%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+                <h6 class="m-0 fw-bold text-dark"><i class="fa-solid fa-chart-line text-primary me-2"></i> Performance Timeline</h6>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3">Export</button>
+            </div>
+            <div class="card-body p-4">
+                <canvas id="studentChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <!-- Progress Tracker -->
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-white border-bottom p-4">
+                <h6 class="m-0 fw-bold text-dark"><i class="fa-solid fa-tasks text-success me-2"></i> Semester Progress Tracker</h6>
+            </div>
+            <div class="card-body p-4">
+                @{
+                    int progressPercentage = Model.EnrolledCoursesCount == 0 
+                        ? 0 
+                        : (int)Math.Round((double)Model.Grades.Count / Model.EnrolledCoursesCount * 100);
+                }
+                <p class="mb-1 fw-semibold text-dark">Overall Completion</p>
+                <div class="progress mb-2 d-flex rounded-pill" style="height: 10px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: @progressPercentage%;" aria-valuenow="@progressPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted d-block text-end">@progressPercentage% Completed</small>
+            </div>
+        </div>
+        <!-- Notifications & Deadlines -->
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-white border-bottom p-4">
+                <h6 class="m-0 fw-bold text-dark"><i class="fa-solid fa-calendar-check text-danger me-2"></i> Upcoming Deadlines</h6>
+            </div>
+            <ul class="list-group list-group-flush rounded-bottom">
+                @if(Model.UpcomingAssignments != null && Model.UpcomingAssignments.Any())
+                {
+                    foreach(var assignment in Model.UpcomingAssignments.Take(3))
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-3 border-bottom">
+                            <div>
+                                <h6 class="mb-0 text-dark fw-semibold">@assignment.Title</h6>
+                                <small class="text-muted">Due: @assignment.DueDate.ToString("MMM dd, yyyy")</small>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">Urgent</span>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item p-4 text-center text-muted border-0">
+                        <i class="fa-solid fa-check-circle fs-3 mb-2 text-success opacity-50"></i>
+                        <p class="mb-0">You're all caught up!</p>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('studentChart').getContext('2d');
+        const studentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.CourseNames)),
+                datasets: [{
+                    label: 'Final Score',
+                    data: @Html.Raw(Json.Serialize(Model.Grades)),
+                    backgroundColor: 'rgba(13, 148, 136, 0.1)', // Matches Teal Primary
+                    borderColor: '#0D9488',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#0D9488',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#0D9488',
+                    pointRadius: 6,
+                    fill: true,
+                    tension: 0.4 /* Smooths the curve heavily */
+                }]
+            },
+            options: { 
+                responsive: true, 
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: { 
+                    y: { 
+                        beginAtZero: true, 
+                        max: 100,
+                        grid: { borderDash: [5, 5], color: '#e5e7eb' },
+                        border: { display: false }
+                    },
+                    x: {
+                        grid: { display: false },
+                        border: { display: false }
+                    }
+                } 
+            }
+        });
+    </script>
+}

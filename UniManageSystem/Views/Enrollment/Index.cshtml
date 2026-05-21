@@ -1,0 +1,47 @@
+@model IEnumerable<UniManageSystem.Models.Enrollment>
+@{
+    ViewData["Title"] = "All Enrollments";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Global Enrollments Tracker <span class="badge bg-danger ms-2">Admin</span></h2>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Enrollment Date</th>
+                            <th>Student Email</th>
+                            <th>Course Title</th>
+                            <th>Final Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.EnrollmentDate.ToLocalTime().ToString("MMM dd, yyyy")</td>
+                                <td class="fw-bold">@(item.Student?.Email ?? "Unknown")</td>
+                                <td>@(item.Course?.Title ?? "Deleted Course")</td>
+                                <td>
+                                    @if(item.FinalGrade.HasValue){
+                                        <span class="badge bg-success fs-6">@item.FinalGrade.Value.ToString("0.00")</span>
+                                    } else {
+                                        <span class="badge bg-warning text-dark fs-6">Pending</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if(!Model.Any()){
+                    <div class="alert alert-secondary m-3 text-center">No enrollments found inside the system yet.</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

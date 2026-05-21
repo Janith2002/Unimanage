@@ -1,0 +1,118 @@
+@model IEnumerable<UniManageSystem.Models.Assignment>
+@{
+    ViewData["Title"] = "Assignments Dashboard";
+    var isStudent = User.IsInRole("Student");
+}
+
+<div class="page-header mt-4 mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="fw-bold text-dark mb-1" style="font-size: 1.75rem; letter-spacing: -0.5px;">Assignments & Submissions</h2>
+        <p class="text-muted mb-0" style="font-size: 1rem;">
+            @(isStudent ? "View and submit your course assignments" : "Manage course assignments and grade student submissions")
+        </p>
+    </div>
+    @if (!isStudent)
+    {
+        <div>
+            <a asp-action="Create" class="btn text-white shadow-sm rounded-pill px-4 fw-semibold" style="background-color: #10B981; padding-top: 0.6rem; padding-bottom: 0.6rem;">
+                <i class="fa-solid fa-plus me-2"></i> Create Assignment
+            </a>
+        </div>
+    }
+</div>
+
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-header bg-white border-bottom p-4">
+        <h5 class="mb-0 fw-bold d-flex align-items-center text-dark">
+            <i class="fa-solid fa-list-check me-3 text-primary fs-4"></i> Active Assignments
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive mb-0 rounded-bottom">
+                <table class="table table-hover align-middle mb-0 border-white">
+                    <thead class="bg-white border-bottom">
+                        <tr>
+                            <th class="ps-4 py-3 text-uppercase text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 1px; width: 45%;">Assignment Details</th>
+                            <th class="py-3 text-uppercase text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 1px;">Course</th>
+                            <th class="py-3 text-uppercase text-muted fw-semibold" style="font-size: 0.75rem; letter-spacing: 1px;">Due Date</th>
+                            <th class="py-3 text-uppercase text-muted fw-semibold text-center" style="font-size: 0.75rem; letter-spacing: 1px;">Max<br />Score</th>
+                            <th class="py-3 text-uppercase text-muted fw-semibold text-end pe-4" style="font-size: 0.75rem; letter-spacing: 1px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var assignment in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 py-4">
+                                    <div class="fw-medium text-dark flex-grow-1" style="font-size: 1.05rem;">@assignment.Title</div>
+                                    <div class="text-muted small text-truncate mt-1" style="max-width: 450px;">
+                                        Overview @assignment.Description
+                                    </div>
+                                </td>
+                                <td class="py-4">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-semibold shadow-none" style="font-size: 0.75rem;">
+                                        @(assignment.Course?.Title ?? "Unknown")
+                                    </span>
+                                </td>
+                                <td class="py-4">
+                                    @{
+                                        var isOverdue = assignment.DueDate < DateTime.UtcNow;
+                                    }
+                                    <div class="d-flex align-items-center text-@(isOverdue ? "danger fw-medium" : "muted") small">
+                                        <i class="fa-regular fa-clock me-2 fs-6"></i> 
+                                        <span>
+                                            @assignment.DueDate.ToLocalTime().ToString("MMM dd, yyyy")<br/>
+                                            @assignment.DueDate.ToLocalTime().ToString("h:mm tt")
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="text-center py-4">
+                                    <div class="text-dark fw-bold" style="font-size: 1rem;">@assignment.MaxScore.ToString("0.00")</div>
+                                    <div class="text-muted small">pts</div>
+                                </td>
+                                <td class="text-end pe-4 py-4">
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        @if (isStudent)
+                                        {
+                                            var isOverdueTask = assignment.DueDate < DateTime.UtcNow;
+                                            <a asp-action="Details" asp-route-id="@assignment.Id" class="btn text-white shadow-sm rounded-pill px-4 d-inline-flex align-items-center justify-content-center fw-semibold transition-all" style="background-color: #0d6efd; font-size: 0.85rem;" title="View & Submit">
+                                                <i class="fa-solid fa-cloud-arrow-up me-2"></i> @(isOverdueTask ? "View Assignment" : "Submit Work")
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="Details" asp-route-id="@assignment.Id" class="btn text-white shadow-sm rounded-pill px-3 py-2 d-inline-flex align-items-center justify-content-center fw-semibold transition-all" style="background-color: #0D9488; font-size: 0.85rem;" title="View & Grade">
+                                                <i class="fa-solid fa-list-check me-1"></i> Grade
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@assignment.Id" class="btn btn-outline-primary shadow-sm rounded-pill px-3 py-2 d-inline-flex align-items-center justify-content-center fw-semibold transition-all" style="font-size: 0.85rem;" title="Edit">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@assignment.Id" class="btn btn-outline-danger shadow-sm rounded-pill px-3 py-2 d-inline-flex align-items-center justify-content-center fw-semibold transition-all" style="font-size: 0.85rem;" title="Delete">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center p-4 mb-3" style="width: 80px; height: 80px;">
+                    <i class="fa-solid fa-folder-open fs-2 text-muted opacity-50"></i>
+                </div>
+                <h5 class="fw-bold text-dark">No Assignments Found</h5>
+                <p class="mb-0 text-muted">You have no active assignments or submissions to grade right now.</p>
+                <a asp-action="Create" class="btn btn-primary rounded-pill px-4 mt-4 shadow-sm py-2">
+                    <i class="fa-solid fa-plus me-2"></i> Create Your First Assignment
+                </a>
+            </div>
+        }
+    </div>
+</div>

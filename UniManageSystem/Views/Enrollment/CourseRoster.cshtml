@@ -1,0 +1,133 @@
+@model UniManageSystem.Models.Course
+@{
+    ViewData["Title"] = $"Roster: {Model.Title}";
+    var pendingRequests = Model.Enrollments.Where(e => e.Status == UniManageSystem.Models.EnrollmentStatus.Pending).ToList();
+    var enrolledStudents = Model.Enrollments.Where(e => e.Status == UniManageSystem.Models.EnrollmentStatus.Approved).ToList();
+}
+
+<div class="page-header mt-2 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="page-title mb-1">Roster: @Model.Title</h2>
+        <p class="text-muted mb-0">Manage student enrollments and pending requests</p>
+    </div>
+    <a asp-controller="Course" asp-action="Index" class="btn btn-secondary shadow-sm rounded-pill px-4">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back to Courses
+    </a>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Enrolled Students (Approved) -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-transparent border-bottom p-4 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="fa-solid fa-users text-success me-2"></i> Enrolled Students</h5>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill shadow-none text-dark">
+                    @enrolledStudents.Count / @Model.Capacity
+                </span>
+            </div>
+            <div class="card-body p-0">
+                @if (enrolledStudents.Any())
+                {
+                    <div class="table-responsive mb-0 rounded-bottom">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Enrolled Date</th>
+                                    <th>Final Grade</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var enrollment in enrolledStudents)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px; font-weight: 600;">
+                                                    @((enrollment.Student?.FirstName?.FirstOrDefault() ?? enrollment.Student?.UserName?.FirstOrDefault())?.ToString().ToUpper())
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold text-dark">@(enrollment.Student?.FirstName) @enrollment.Student?.LastName</div>
+                                                    <div class="text-muted small">@enrollment.Student?.Email</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="text-muted small">@enrollment.ApprovedDate?.ToLocalTime().ToString("MMM dd, yyyy")</span></td>
+                                        <td>
+                                            @if(enrollment.FinalGrade.HasValue){
+                                                <span class="text-dark fw-bold">@enrollment.FinalGrade.Value.ToString("0.00")</span>
+                                            } else {
+                                                <span class="text-muted small">N/A</span>
+                                            }
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <form asp-action="RemoveStudent" method="post" class="m-0" onsubmit="return confirm('Are you sure you want to remove this student from the course?');">
+                                                <input type="hidden" name="id" value="@enrollment.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm rounded-pill px-3">
+                                                    <i class="fa-solid fa-user-minus me-1"></i> Remove
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center p-5 text-muted">
+                        <i class="fa-solid fa-users-slash fs-1 mb-3 opacity-25"></i>
+                        <p class="mb-0">No active students enrolled.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Requests -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-transparent border-bottom p-4">
+                <h5 class="mb-0 fw-bold"><i class="fa-solid fa-clipboard-question text-warning me-2"></i> Pending Requests</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (pendingRequests.Any())
+                {
+                    <ul class="list-group list-group-flush rounded-bottom">
+                        @foreach (var req in pendingRequests)
+                        {
+                            <li class="list-group-item p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <div class="fw-semibold text-dark">@(req.Student?.FirstName) @req.Student?.LastName</div>
+                                        <div class="text-muted small">@req.Student?.Email</div>
+                                    </div>
+                                    <span class="text-muted small" style="font-size:0.75rem;">@req.EnrollmentDate.ToLocalTime().ToString("MMM dd")</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <form asp-action="ApproveEnrollment" method="post" class="m-0 w-50">
+                                        <input type="hidden" name="id" value="@req.Id" />
+                                        <button type="submit" class="btn btn-sm btn-success w-100 shadow-sm rounded-pill"><i class="fa-solid fa-check"></i> Approve</button>
+                                    </form>
+                                    <form asp-action="RejectEnrollment" method="post" class="m-0 w-50">
+                                        <input type="hidden" name="id" value="@req.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100 shadow-sm rounded-pill"><i class="fa-solid fa-xmark"></i> Reject</button>
+                                    </form>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="text-center p-4 text-muted">
+                        <i class="fa-solid fa-check-double fs-3 mb-2 opacity-25"></i>
+                        <p class="mb-0 small">No pending requests.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

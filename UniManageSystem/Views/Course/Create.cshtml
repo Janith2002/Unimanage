@@ -1,0 +1,82 @@
+@model UniManageSystem.ViewModels.CourseViewModel
+@{
+    ViewData["Title"] = "Create Course";
+}
+
+<div class="page-header mt-2">
+    <div>
+        <h2 class="page-title mb-1">Create Course</h2>
+        <p class="text-muted mb-0">Add a new course to the university catalog</p>
+    </div>
+    <a asp-action="Index" class="btn btn-secondary shadow-sm rounded-pill px-4">
+        <i class="fa-solid fa-arrow-left me-2"></i>Back to Directory
+    </a>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-bottom p-4">
+                <h5 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-book-open text-primary me-2"></i>Course Information</h5>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form asp-action="Create" enctype="multipart/form-data" class="needs-validation">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4 rounded-3 border-0 shadow-sm" role="alert"></div>
+
+                    <div class="form-floating mb-4 form-group">
+                        <input asp-for="Title" class="form-control bg-light" placeholder="e.g. Introduction to Computer Science" id="floatingTitle" />
+                        <label asp-for="Title" for="floatingTitle" class="text-muted">Course Title</label>
+                        <span asp-validation-for="Title" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="form-floating mb-4 form-group">
+                        <textarea asp-for="Description" class="form-control bg-light" placeholder="Detailed syllabus description..." id="floatingDesc" style="height: 120px"></textarea>
+                        <label asp-for="Description" for="floatingDesc" class="text-muted">Course Description</label>
+                        <span asp-validation-for="Description" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6 form-group">
+                            <div class="form-floating">
+                                <input asp-for="Capacity" class="form-control bg-light" placeholder="E.g., 50" min="1" id="floatingCapacity" />
+                                <label asp-for="Capacity" for="floatingCapacity" class="text-muted">Max Capacity</label>
+                            </div>
+                            <span asp-validation-for="Capacity" class="text-danger small mt-1 d-block"></span>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <div class="form-floating">
+                                <select asp-for="LecturerId" class="form-select bg-light" asp-items="ViewBag.LecturerId" id="floatingLecturer">
+                                    <option value="">-- Choose Instructor --</option>
+                                </select>
+                                <label asp-for="LecturerId" for="floatingLecturer" class="text-muted">Assign Lecturer</label>
+                            </div>
+                            <span asp-validation-for="LecturerId" class="text-danger small mt-1 d-block"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-5 form-group">
+                        <label asp-for="ImageUpload" class="form-label fw-medium text-dark mb-2">Course Thumbnail (Optional)</label>
+                        <div class="input-group drop-zone border rounded-3 bg-light p-2">
+                            <input asp-for="ImageUpload" class="form-control border-0 bg-transparent" type="file" accept="image/*" />
+                        </div>
+                        <span asp-validation-for="ImageUpload" class="text-danger small mt-1 d-block"></span>
+                        <small class="text-muted mt-2 d-block"><i class="fa-solid fa-circle-info me-1"></i> Recommended size: 800x600px (JPG/PNG)</small>
+                    </div>
+
+                    <hr class="mb-4 text-muted opacity-25" />
+
+                    <div class="d-flex justify-content-end gap-3">
+                        <button type="reset" class="btn btn-light px-4 border shadow-sm">Reset</button>
+                        <button type="submit" class="btn btn-primary px-5 shadow-sm">
+                            Publish Course <i class="fa-solid fa-paper-plane ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

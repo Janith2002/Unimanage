@@ -1,0 +1,204 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!-- Clean Minimal Hero Section -->
+<div class="container-fluid bg-light py-5 border-bottom">
+    <div class="container px-4 py-5 text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="d-inline-block px-3 py-1 rounded-pill mb-3" style="background-color: #F0FDFA; color: #0D9488; font-size: 0.9rem; font-weight: 500;">
+                    <i class="fa-solid fa-sparkles me-2"></i> Modern Academic Management
+                </div>
+                <h1 class="display-4 fw-bold text-dark mb-4" style="letter-spacing: -1px;">Welcome to UniManage System</h1>
+                <p class="lead text-secondary mb-5 px-md-5">Your comprehensive platform to manage courses, assignments, enrollments, and academic reports efficiently and effectively.</p>
+                
+                <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                    @if (!User.Identity?.IsAuthenticated ?? true)
+                    {
+                        <a href="/Identity/Account/Register" class="btn btn-primary btn-lg px-5 py-3 fw-semibold rounded-3 shadow-sm" style="background-color: #0D9488; border-color: #0D9488;">Get Started</a>
+                        <a href="/Identity/Account/Login" class="btn btn-secondary btn-lg px-5 py-3 fw-semibold rounded-3 shadow-sm">Login</a>
+                    }
+                    <a asp-controller="Course" asp-action="Index" class="btn btn-dark btn-lg px-5 py-3 fw-semibold rounded-3 shadow-sm">Explore Courses</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container px-4 py-5 mt-3">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold mb-3 text-dark">Platform Features</h2>
+        <p class="text-secondary">Everything you need to excel in your academic journey.</p>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Feature 1 -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-shadow transition-all">
+                <div class="card-body">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" style="width: 64px; height: 64px; color: #0D9488;">
+                        <i class="fa-solid fa-book fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Course Management</h5>
+                    <p class="text-secondary mb-0 small">Access a wide range of academic courses, enroll in classes, and interact with course materials anytime, anywhere.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feature 2 -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-shadow transition-all">
+                <div class="card-body">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" style="width: 64px; height: 64px; color: #10B981;">
+                        <i class="fa-solid fa-file-signature fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Assignment System</h5>
+                    <p class="text-secondary mb-0 small">Keep track of your tasks, submit assignments seamlessly, and receive grades and constructive feedback online.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feature 3 -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-shadow transition-all">
+                <div class="card-body">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" style="width: 64px; height: 64px; color: #F59E0B;">
+                        <i class="fa-solid fa-user-plus fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Easy Enrollment</h5>
+                    <p class="text-secondary mb-0 small">Simplified enrollment process for students and streamlined class administration for lecturers and staff.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-shadow transition-all">
+                <div class="card-body">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" style="width: 64px; height: 64px; color: #EF4444;">
+                        <i class="fa-solid fa-chart-pie fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Detailed Reporting</h5>
+                    <p class="text-secondary mb-0 small">Generate detailed academic reports to continuously track academic progress, attendance, and overall performance.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="container-fluid bg-light py-5 my-5">
+    <div class="container px-4">
+        <div class="row g-4 text-center justify-content-center">
+            <div class="col-md-4 col-sm-6">
+                <div class="py-3">
+                    <h2 class="display-5 fw-bold text-dark mb-2">15+</h2>
+                    <p class="text-secondary text-uppercase fw-semibold mb-0" style="letter-spacing: 1px; font-size: 0.85rem;">Active Courses</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="py-3">
+                    <h2 class="display-5 fw-bold text-dark mb-2">20+</h2>
+                    <p class="text-secondary text-uppercase fw-semibold mb-0" style="letter-spacing: 1px; font-size: 0.85rem;">Enrolled Students</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="py-3">
+                    <h2 class="display-5 fw-bold text-dark mb-2">10+</h2>
+                    <p class="text-secondary text-uppercase fw-semibold mb-0" style="letter-spacing: 1px; font-size: 0.85rem;">Expert Lecturers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Course Preview Section -->
+<div class="container px-4 py-5 mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Featured Courses</h2>
+            <p class="text-secondary mb-0">Discover top-rated academic programs.</p>
+        </div>
+        <a asp-controller="Course" asp-action="Index" class="btn btn-outline-primary d-none d-md-inline-block rounded-pill px-4">View All</a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Course 1 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 160px; color: #6C757D;">
+                    <i class="fa-solid fa-laptop-code fa-3x"></i>
+                </div>
+                <div class="card-body p-4">
+                    <div class="badge bg-primary bg-opacity-10 text-primary mb-2">Computer Science</div>
+                    <h5 class="fw-bold text-dark mb-2">Advanced Programming</h5>
+                    <p class="text-secondary small mb-3 border-bottom pb-3">Learn modern software architecture and advanced programming concepts in C#.</p>
+                    <div class="d-flex align-items-center justify-content-between text-muted small">
+                        <span><i class="fa-solid fa-users me-1"></i> 120 Students</span>
+                        <span><i class="fa-solid fa-chalkboard-user me-1"></i> Prof. Smith</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Course 2 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 160px; color: #10B981;">
+                    <i class="fa-solid fa-chart-line fa-3x"></i>
+                </div>
+                <div class="card-body p-4">
+                    <div class="badge bg-success bg-opacity-10 text-success mb-2">Business</div>
+                    <h5 class="fw-bold text-dark mb-2">Data Analytics</h5>
+                    <p class="text-secondary small mb-3 border-bottom pb-3">Master data visualization and business intelligence strategies for modern enterprises.</p>
+                    <div class="d-flex align-items-center justify-content-between text-muted small">
+                        <span><i class="fa-solid fa-users me-1"></i> 85 Students</span>
+                        <span><i class="fa-solid fa-chalkboard-user me-1"></i> Dr. Johnson</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course 3 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 160px; color: #F59E0B;">
+                    <i class="fa-solid fa-palette fa-3x"></i>
+                </div>
+                <div class="card-body p-4">
+                    <div class="badge bg-warning bg-opacity-10 text-warning mb-2 text-dark">Design</div>
+                    <h5 class="fw-bold text-dark mb-2">UI/UX Principles</h5>
+                    <p class="text-secondary small mb-3 border-bottom pb-3">Understand the fundamentals of user interface design and user experience research.</p>
+                    <div class="d-flex align-items-center justify-content-between text-muted small">
+                        <span><i class="fa-solid fa-users me-1"></i> 200 Students</span>
+                        <span><i class="fa-solid fa-chalkboard-user me-1"></i> Ms. Davis</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center d-md-none mt-4">
+        <a asp-controller="Course" asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">View All Courses</a>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="container-fluid bg-dark text-white py-5" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);">
+    <div class="container px-4 py-5 text-center">
+        <h2 class="fw-bold mb-3">Start Managing Your Courses Today</h2>
+        <p class="text-white-50 mb-5 mx-auto" style="max-width: 600px; font-size: 1.1rem;">Join our platform to streamline your educational journey whether you are a student, lecturer, or administrator.</p>
+        @if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="/Identity/Account/Register" class="btn btn-primary px-5 py-3 fw-semibold rounded-3 shadow" style="background-color: #0D9488; border-color: #0D9488;">Create Account</a>
+                <a href="/Identity/Account/Login" class="btn btn-outline-light px-5 py-3 fw-semibold rounded-3">Sign In</a>
+            </div>
+        }
+        else
+        {
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary px-5 py-3 fw-semibold rounded-3 shadow" style="background-color: #0D9488; border-color: #0D9488;">Go to Dashboard</a>
+        }
+    </div>
+</div>

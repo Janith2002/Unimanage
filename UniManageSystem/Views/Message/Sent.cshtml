@@ -1,0 +1,34 @@
+@model IEnumerable<UniManageSystem.Models.Message>
+
+@{
+    ViewData["Title"] = "Sent Messages";
+}
+
+<div class="container mt-4">
+    <h2>Sent Messages</h2>
+    <a asp-action="Inbox" class="btn btn-secondary mb-3">Back to Inbox</a>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Receiver</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@(item.Receiver?.FirstName) @(item.Receiver?.LastName)</td>
+                        <td><a asp-action="Read" asp-route-id="@item.Id">@item.Subject</a></td>
+                        <td>@item.SentDate.ToLocalTime()</td>
+                        <td>@(item.IsRead ? "Read" : "Unread")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

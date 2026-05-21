@@ -1,0 +1,174 @@
+@model UniManageSystem.ViewModels.LecturerDashboardViewModel
+@{
+    ViewData["Title"] = "Lecturer Dashboard";
+}
+
+<div class="page-header mt-2">
+    <div>
+        <h2 class="page-title mb-1">Instructor Dashboard</h2>
+        <p class="text-muted mb-0">Manage your classes, students, and grading</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Assignment" asp-action="Create" class="btn btn-primary shadow-sm rounded-pill px-4">
+            <i class="fa-solid fa-plus me-2"></i> Create Assignment
+        </a>
+        <a asp-controller="Assignment" asp-action="CourseAssignments" class="btn btn-primary shadow-sm rounded-pill px-4">
+            <i class="fa-solid fa-list-check me-2"></i> Grade Submissions
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Stat Card 1 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="fa-solid fa-person-chalkboard"></i>
+                </div>
+                <div class="stat-details">
+                    <p>Courses Taught</p>
+                    <h3>@Model.TotalCoursesTaught</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat Card 2 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-details">
+                    <p>Total Enrolled</p>
+                    <h3>@Model.TotalStudentsEnrolled</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat Card 3 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <div class="stat-details">
+                    <p>Pending Grace</p>
+                    <h3>@Model.PendingSubmissionsToGrade</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+<div class="col-lg-4">
+    <div class="card shadow-sm mb-4 h-100 border-0 rounded-4">
+        <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 fw-bold text-dark"><i class="fa-solid fa-chart-pie text-primary me-2"></i> Submissions Tracker</h6>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3">View Details</button>
+        </div>
+        <div class="card-body p-4 d-flex align-items-center justify-content-center">
+            <div style="width: 100%; max-width: 250px;">
+                <canvas id="lecturerChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-lg-4">
+<div class="card shadow-sm mb-4 h-100 border-0 rounded-4">
+    <div class="card-header bg-white border-bottom p-4">
+        <h6 class="m-0 fw-bold text-dark"><i class="fa-solid fa-chart-line text-primary me-2"></i> Student Performance Trend</h6>
+    </div>
+    <div class="card-body p-4 d-flex align-items-center justify-content-center">
+            <canvas id="performanceChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+<div class="col-lg-4">
+    <div class="card shadow-sm mb-4 h-100 border-0 rounded-4">
+        <div class="card-header bg-white border-bottom p-4">
+            <h6 class="m-0 fw-bold text-dark"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i> Recent Courses Activity</h6>
+        </div>
+            <ul class="list-group list-group-flush rounded-bottom">
+                @if(Model.RecentCourses != null && Model.RecentCourses.Any()){
+                    foreach(var course in Model.RecentCourses){
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-4 border-bottom">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded px-3 py-2 fw-bold">
+                                    @course.Title.Substring(0, 1)
+                                </div>
+                                <span class="fw-semibold text-dark">@course.Title</span>
+                            </div>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 shadow-none border border-primary border-opacity-25">
+                                @course.Enrollments.Count Students
+                            </span>
+                        </li>
+                    }
+                } else {
+                    <li class="list-group-item text-muted p-5 text-center border-0">
+                        <i class="fa-solid fa-folder-open fs-2 text-muted opacity-50 mb-3 block"></i>
+                        <p>No active courses found.</p>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('lecturerChart').getContext('2d');
+        const lecturerChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.AssignmentNames)),
+                datasets: [{
+                    label: 'Submissions',
+                    data: @Html.Raw(Json.Serialize(Model.SubmissionCounts)),
+                    backgroundColor: [
+                        '#1f2937', 
+                        '#374151', 
+                        '#4b5563', 
+                        '#6b7280', 
+                        '#9ca3af'  
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 4
+                }]
+            },
+            options: { 
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                }
+            }
+        });
+
+        const ctx2 = document.getElementById('performanceChart').getContext('2d');
+        const perfChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Avg Grade',
+                    data: [75, 82, 80, 89],
+                    backgroundColor: '#374151',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, max: 100 } }
+            }
+        });
+    </script>
+}

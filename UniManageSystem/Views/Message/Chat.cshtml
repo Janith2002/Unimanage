@@ -1,0 +1,132 @@
+@model UniManageSystem.ViewModels.ChatViewModel
+@{
+    ViewData["Title"] = "Chat with " + Model.ChatUserName;
+}
+
+<div class="container mt-4">
+    <div class="row w-100">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm" style="height: 70vh;">
+                <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Chat with @Model.ChatUserName</h5>
+                    <a asp-action="Index" class="btn btn-sm btn-light">Back to Contacts</a>
+                </div>
+                
+                <div class="card-body overflow-auto d-flex flex-column" id="chatArea" style="background-color: #f8f9fa;">
+                    @foreach (var msg in Model.Messages)
+                    {
+                        if (msg.IsMine)
+                        {
+                            <div class="mb-2 ms-auto text-end" style="max-width: 75%;">
+                                <div class="bg-primary text-white rounded p-2 mb-1 shadow-sm">
+                                    @msg.Content
+                                </div>
+                                <small class="text-muted" style="font-size: 0.75rem;">@msg.SentDate</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-2 me-auto text-start" style="max-width: 75%;">
+                                <div class="bg-white rounded border p-2 mb-1 shadow-sm">
+                                    @msg.Content
+                                </div>
+                                <small class="text-muted" style="font-size: 0.75rem;">@msg.SentDate</small>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <div class="card-footer bg-white">
+                    <form id="chatForm">
+                        <input type="hidden" id="receiverId" value="@Model.ChatUserId" />
+                        <div class="input-group">
+                            <input type="text" id="messageInput" class="form-control" autocomplete="off" placeholder="Type a message..." required />
+                            <button type="submit" class="btn btn-primary" id="sendButton">
+                                Send
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const chatArea = document.getElementById("chatArea");
+        const chatForm = document.getElementById("chatForm");
+        const messageInput = document.getElementById("messageInput");
+        const receiverId = document.getElementById("receiverId").value;
+        const sendButton = document.getElementById("sendButton");
+
+        // Scroll to bottom on load
+        function scrollToBottom() {
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        window.onload = scrollToBottom;
+
+        // SignalR Connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        connection.on("ReceiveMessage", function (senderId, messageText) {
+            // Append the message ONLY if it's from the person we're chatting with
+            if (senderId === receiverId) {
+                const msgHtml = `
+                    <div class="mb-2 me-auto text-start" style="max-width: 75%;">
+                        <div class="bg-white rounded border p-2 mb-1 shadow-sm">
+                            ${messageText}
+                        </div>
+                        <small class="text-muted" style="font-size: 0.75rem;">Just now</small>
+                    </div>`;
+                chatArea.insertAdjacentHTML('beforeend', msgHtml);
+                scrollToBottom();
+            }
+        });
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        // Form Submission
+        chatForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            // Submit to Controller logic (Saves inside database)
+            fetch('@Url.Action("Send", "Message")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: `receiverId=${encodeURIComponent(receiverId)}&content=${encodeURIComponent(text)}`
+            }).then(response => {
+                if (response.ok) {
+                    // Instantly trigger SignalR real-time Broadcast explicitly
+                    connection.invoke("SendPrivateMessage", receiverId, text).catch(function (err) {
+                        return console.error(err.toString());
+                    });
+
+                    // Add our own sent message to UI without waiting
+                    const msgHtml = `
+                    <div class="mb-2 ms-auto text-end" style="max-width: 75%;">
+                        <div class="bg-primary text-white rounded p-2 mb-1 shadow-sm">
+                            ${text}
+                        </div>
+                        <small class="text-muted" style="font-size: 0.75rem;">Just now</small>
+                    </div>`;
+                    chatArea.insertAdjacentHTML('beforeend', msgHtml);
+                    messageInput.value = '';
+                    scrollToBottom();
+                } else {
+                    alert('Failed to send message.');
+                }
+            });
+        });
+    </script>
+}

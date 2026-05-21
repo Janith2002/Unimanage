@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Send Message";
+    var users = ViewBag.Users as IEnumerable<UniManageSystem.Models.ApplicationUser>;
+}
+
+<div class="container mt-4">
+    <h2>Send Message</h2>
+    <a asp-action="Inbox" class="btn btn-secondary mb-3">Back to Inbox</a>
+
+    <div class="card p-4 shadow">
+        <form asp-action="SendMessage" method="post">
+            <div class="mb-3">
+                <label for="receiverId" class="form-label">To:</label>
+                <select id="receiverId" name="receiverId" class="form-select" required>
+                    <option value="">Select a Recipient</option>
+                    @if (users != null)
+                    {
+                        foreach (var user in users)
+                        {
+                            <option value="@user.Id">@user.FirstName @user.LastName (@user.Email)</option>
+                        }
+                    }
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="subject" class="form-label">Subject:</label>
+                <input type="text" id="subject" name="subject" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label for="content" class="form-label">Message:</label>
+                <textarea id="content" name="content" class="form-control" rows="5" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary d-flex ms-auto">Send</button>
+        </form>
+    </div>
+</div>

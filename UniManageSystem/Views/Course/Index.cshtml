@@ -1,0 +1,181 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<UniManageSystem.Models.ApplicationUser> UserManager
+@model UniManageSystem.Helpers.PaginatedList<UniManageSystem.Models.Course>
+@{
+    ViewData["Title"] = "Courses";
+    var currentUser = await UserManager.GetUserAsync(User);
+}
+
+<div class="page-header mt-2">
+    <div>
+        <h2 class="page-title mb-1">Courses Directory</h2>
+        <p class="text-muted mb-0">Manage and browse available courses</p>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="btn btn-primary shadow-sm rounded-pill px-4">
+            <i class="fa-solid fa-plus me-2"></i>Create New Course
+        </a>
+    }
+</div>
+
+<!-- Search/Filter -->
+<div class="card shadow-sm border-0 mb-4 rounded-4">
+    <div class="card-body p-4">
+        <form asp-action="Index" method="get" class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-search"></i></span>
+                    <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" class="form-control bg-light border-start-0 ps-0" placeholder="Search by title or description..." />
+                </div>
+            </div>
+            
+            @if (!User.IsInRole("Lecturer"))
+            {
+                <div class="col-md-4">
+                    <select name="lecturerFilter" class="form-select bg-light" asp-items="ViewBag.Lecturers">
+                        <option value="">-- All Lecturers --</option>
+                    </select>
+                </div>
+            }
+
+            <div class="col-md-3 d-flex gap-2">
+                <button class="btn btn-primary px-4" type="submit">Filter</button>
+                <a asp-action="Index" class="btn btn-secondary px-4">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100 border-0 rounded-4 overflow-hidden">
+                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                {
+                    <img src="~/images/courses/@item.ImageUrl" class="card-img-top" alt="Course Image" style="height: 160px; object-fit: cover;">
+                }
+                else
+                {
+                    <div class="bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary" style="height: 160px;">
+                        <i class="fa-solid fa-book-open fs-1 opacity-50"></i>
+                    </div>
+                }
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <h5 class="card-title fw-bold text-dark mb-2">@item.Title</h5>
+                    <p class="text-muted small mb-3">
+                        <i class="fa-solid fa-chalkboard-user me-2"></i>
+                        @if (item.Lecturer != null)
+                        {
+                            <span class="text-dark fw-medium me-1">
+                                @(string.IsNullOrWhiteSpace(item.Lecturer.FirstName) && string.IsNullOrWhiteSpace(item.Lecturer.LastName) ? item.Lecturer.UserName : $"{item.Lecturer.FirstName} {item.Lecturer.LastName}".Trim())
+                            </span>
+                            <span class="opacity-75">(@item.Lecturer.Email)</span>
+                        }
+                        else
+                        {
+                            <span class="text-dark fw-medium">Not Assigned</span>
+                        }
+                    </p>
+                    <p class="card-text text-muted text-truncate" style="max-height: 4.5em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+                        @item.Description
+                    </p>
+
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        @{
+                            var enrolledCount = item.Enrollments?.Count(e => e.Status == UniManageSystem.Models.EnrollmentStatus.Approved) ?? 0;
+                            var percent = item.Capacity > 0 ? (int)Math.Round((double)enrolledCount / item.Capacity * 100) : 0;
+                            var progressColor = percent >= 100 ? "bg-danger" : (percent > 75 ? "bg-warning" : "bg-success");
+                        }
+                        <div class="w-100 me-3">
+                            <div class="d-flex justify-content-between text-muted mb-1" style="font-size: 0.75rem; font-weight: 500;">
+                                <span>@enrolledCount / @item.Capacity</span>
+                                <span>@percent%</span>
+                            </div>
+                            <div class="progress rounded-pill shadow-sm" style="height: 6px; background-color: #E5E7EB;">
+                                <div class="progress-bar @progressColor rounded-pill" role="progressbar" style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-light text-primary border shadow-sm" title="View Details">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light text-warning border shadow-sm" title="Edit Course">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-light text-danger border shadow-sm" title="Delete Course">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            }
+                            @if (User.IsInRole("Admin") || (User.IsInRole("Lecturer") && item.LecturerId == currentUser?.Id))
+                            {
+                                <a asp-controller="Enrollment" asp-action="CourseRoster" asp-route-courseId="@item.Id" class="btn btn-sm btn-light text-success border shadow-sm" title="Manage Roster">
+                                    <i class="fa-solid fa-users-gear"></i>
+                                </a>
+                            }
+                            @if (User.IsInRole("Student"))
+                            {
+                                bool isFull = enrolledCount >= item.Capacity;
+                                <form asp-controller="Enrollment" asp-action="RequestEnrollment" method="post" class="m-0">
+                                    <input type="hidden" name="courseId" value="@item.Id" />
+                                    @if(isFull) {
+                                        <button type="button" class="btn btn-sm btn-secondary disabled shadow-sm" title="Course is Full">
+                                            <i class="fa-solid fa-ban"></i>
+                                        </button>
+                                    } else {
+                                        <button type="submit" class="btn btn-sm btn-success shadow-sm" title="Request Enrollment">
+                                            <i class="fa-solid fa-hand-paper"></i> Request
+                                        </button>
+                                    }
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    
+    @if(!Model.Any()){
+        <div class="col-12">
+            <div class="text-center py-5 text-muted">
+                <i class="fa-solid fa-folder-open fs-1 mb-3 opacity-50"></i>
+                <p class="mb-0">No courses found matching your criteria.</p>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Pagination Controls -->
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+@if(Model.TotalPages > 1) {
+    <div class="d-flex justify-content-between align-items-center mt-2 px-2">
+        <span class="text-muted font-monospace small">Page @Model.PageIndex of @Model.TotalPages</span>
+        <div class="btn-group shadow-sm">
+            <a asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex - 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               asp-route-lecturerFilter="@ViewData["CurrentLecturerFilter"]"
+               class="btn btn-light border @prevDisabled">
+                <i class="fa-solid fa-chevron-left me-1"></i> Prev
+            </a>
+            <a asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex + 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               asp-route-lecturerFilter="@ViewData["CurrentLecturerFilter"]"
+               class="btn btn-light border @nextDisabled">
+                Next <i class="fa-solid fa-chevron-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+}
+

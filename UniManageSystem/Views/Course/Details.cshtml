@@ -1,0 +1,92 @@
+@model UniManageSystem.Models.Course
+
+@{
+    ViewData["Title"] = "Course Details";
+    var isStudent = User.IsInRole("Student");
+    var isAdmin = User.IsInRole("Admin");
+    var isLecturer = User.IsInRole("Lecturer");
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    bool isLecturerForCourse = isLecturer && Model.LecturerId == currentUserId;
+}
+
+<div class="row align-items-center mt-4 mb-4">
+    <div class="col-md-8">
+        <h2 class="fw-bold text-dark mb-1">@Model.Title</h2>
+        <p class="text-muted"><i class="fa-solid fa-chalkboard-user me-2"></i>Lecturer: @(Model.Lecturer?.FirstName ?? "Unknown") @(Model.Lecturer?.LastName ?? "")</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a asp-action="Index" class="btn btn-light rounded-pill shadow-sm px-4 fw-semibold transition-all">
+            <i class="fa-solid fa-arrow-left me-2"></i> Back to Courses
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="~/@Model.ImageUrl" class="card-img-top rounded-top-4" alt="@Model.Title" style="max-height: 300px; object-fit: cover;" />
+            }
+            <div class="card-body p-4 p-md-5">
+                <div class="bg-light rounded-4 p-4 border-0 mb-4">
+                    <h6 class="fw-bold text-dark mb-3 small text-uppercase">Course Description</h6>
+                    <p class="mb-0 text-muted" style="white-space: pre-wrap;">@Model.Description</p>
+                </div>
+                
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-list-check text-primary me-2"></i> Assignments</h5>
+                @if (Model.Assignments != null && Model.Assignments.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var assignment in Model.Assignments.OrderBy(a => a.DueDate))
+                        {
+                            <a asp-controller="Assignment" asp-action="Details" asp-route-id="@assignment.Id" class="list-group-item list-group-item-action p-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold text-dark">@assignment.Title</div>
+                                    <small class="text-muted"><i class="fa-regular fa-clock me-1"></i> Due: @assignment.DueDate.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">@assignment.MaxScore pts</span>
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted p-4 bg-light rounded text-center">
+                        <i class="fa-solid fa-inbox fs-2 opacity-50 mb-3 block"></i>
+                        <p class="mb-0">No assignments yet.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-bottom p-4">
+                <h5 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-circle-info text-primary fs-5 me-2"></i> Overview</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
+                    <span class="text-muted">Capacity</span>
+                    <span class="fw-bold text-dark">@Model.Capacity students</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
+                    <span class="text-muted">Enrolled</span>
+                    <span class="fw-bold text-dark">@(Model.Enrollments?.Count ?? 0) / @Model.Capacity</span>
+                </div>
+                
+                @if (isAdmin || isLecturerForCourse)
+                {
+                    <div class="d-grid gap-2 mt-4">
+                        <a asp-controller="Course" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-pill shadow-sm">
+                            <i class="fa-solid fa-pen-to-square me-1"></i> Edit Course
+                        </a>
+                        <a asp-controller="Enrollment" asp-action="CourseRoster" asp-route-courseId="@Model.Id" class="btn btn-outline-secondary rounded-pill shadow-sm">
+                            <i class="fa-solid fa-users me-1"></i> Manage Roster
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

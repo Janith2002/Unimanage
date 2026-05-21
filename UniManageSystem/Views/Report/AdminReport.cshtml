@@ -1,0 +1,148 @@
+@model UniManageSystem.ViewModels.AdminReportViewModel
+@{
+    ViewData["Title"] = "Admin Report";
+}
+
+<div class="page-header mt-2">
+    <div>
+        <h2 class="page-title mb-1">Analytics & Reports</h2>
+        <p class="text-muted mb-0">System wide statistical overview</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="ExportAdminCsv" class="btn btn-success shadow-sm rounded-pill px-4">
+            <i class="fa-solid fa-file-csv me-2"></i> Export to CSV
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4 mt-2">
+    <!-- Stat Card 1 -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-details">
+                    <p>Total Registered Users</p>
+                    <h3>@Model.TotalUsers</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat Card 2 -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fa-solid fa-book"></i>
+                </div>
+                <div class="stat-details">
+                    <p>Total Active Courses</p>
+                    <h3>@Model.TotalCourses</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stat Card 3 -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="stat-details">
+                    <p>Processed Enrollments</p>
+                    <h3>@Model.TotalEnrollments</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4 border-0 rounded-4">
+    <div class="card-header bg-white border-bottom p-4">
+        <h6 class="m-0 fw-bold text-dark"><i class="fa-solid fa-chart-column text-primary me-2"></i> Course Popularity & Fill Rates</h6>
+    </div>
+    <div class="card-body p-4">
+        <div class="row g-4">
+            <div class="col-lg-7 border-end-lg pe-lg-4">
+                <canvas id="courseChart" height="250"></canvas>
+            </div>
+            <div class="col-lg-5 ps-lg-4">
+                <div class="table-responsive rounded-3 border" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light sticky-top">
+                            <tr>
+                                <th>Course Title</th>
+                                <th>Students</th>
+                                <th class="text-end">Usage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var c in Model.CoursePopularity)
+                            {
+                                <tr>
+                                    <td class="fw-medium text-dark py-3">
+                                        <i class="fa-solid fa-book-bookmark text-muted me-2 small"></i>@c.CourseName
+                                    </td>
+                                    <td class="text-muted">
+                                        @c.Enrollments / @c.Capacity
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="badge @(c.FillPercentage >= 100 ? "bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" : (c.FillPercentage > 70 ? "bg-warning bg-opacity-10 text-warning border border-warning" : "bg-success bg-opacity-10 text-success border border-success border-opacity-25")) rounded-pill px-3 py-1 shadow-sm">
+                                            @c.FillPercentage.ToString("0.0")%
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('courseChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.CoursePopularity.Select(c => c.CourseName))),
+                datasets: [{
+                    label: 'Enrolled Students',
+                    data: @Html.Raw(Json.Serialize(Model.CoursePopularity.Select(c => c.Enrollments))),
+                    backgroundColor: 'rgba(79, 70, 229, 0.85)',
+                    borderColor: 'transparent',
+                    borderWidth: 0,
+                    borderRadius: 6,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        suggestedMax: 10,
+                        grid: { borderDash: [5, 5], color: '#e5e7eb' },
+                        border: { display: false }
+                    },
+                    x: {
+                        grid: { display: false },
+                        border: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+}

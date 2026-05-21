@@ -1,0 +1,101 @@
+@model IEnumerable<UniManageSystem.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Manage Lecturers";
+}
+
+<div class="page-header mt-4 mb-4 d-flex flex-wrap justify-content-between align-items-center border-bottom pb-4">
+    <div>
+        <h2 class="page-title mb-1">
+            <i class="fa-solid fa-chalkboard-user text-primary me-2"></i> Manage Lecturers 
+            <span class="badge bg-primary bg-opacity-10 text-primary ms-2 fs-6 rounded-pill border border-primary border-opacity-25" style="vertical-align: middle;">@Model.Count() Lecturers</span>
+        </h2>
+        <p class="text-muted mb-0">Search, view, and manage all registered lecturer accounts.</p>
+    </div>
+
+    <form asp-action="Lecturers" method="get" class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+        <div class="input-group shadow-sm rounded-pill overflow-hidden" style="width: 320px;">
+            <span class="input-group-text bg-white border-0 text-muted ps-3 pe-2"><i class="fa-solid fa-search"></i></span>
+            <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control border-0 ps-1 shadow-none bg-white" placeholder="Search by name, ID or email..." />
+            <button type="submit" class="btn btn-primary px-4 border-0 fw-semibold text-white">Search</button>
+        </div>
+        @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+        {
+            <a asp-action="Lecturers" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm" title="Clear Filters"><i class="fa-solid fa-xmark"></i></a>
+        }
+    </form>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 fw-semibold text-secondary text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">Lecturer Profile</th>
+                        <th class="py-3 fw-semibold text-secondary text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">Contact Email</th>
+                        <th class="py-3 fw-semibold text-secondary text-uppercase text-center" style="font-size: 0.85rem; letter-spacing: 0.5px;">Account Status</th>
+                        <th class="py-3 fw-semibold text-secondary text-uppercase text-end pe-4" style="font-size: 0.85rem; letter-spacing: 0.5px;">Manage Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                    <i class="fa-solid fa-user-slash fs-2 text-secondary"></i>
+                                </div>
+                                <h5>No Lecturers Found</h5>
+                                <p class="mb-0">There are no lecturers matching your criteria.</p>
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; font-weight: 600;">
+                                        @if (!string.IsNullOrEmpty(item.FirstName) && !string.IsNullOrEmpty(item.LastName))
+                                        {
+                                            @Html.Raw($"{item.FirstName[0]}{item.LastName[0]}")
+                                        }
+                                        else
+                                        {
+                                            <i class="fa-solid fa-user"></i>
+                                        }
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold text-dark">@(string.IsNullOrWhiteSpace(item.FirstName) ? "No Name" : $"{item.FirstName} {item.LastName}")</div>
+                                        <div class="text-muted small">ID: @item.Id.Substring(0, 8)...</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2 p-2">
+                                        <i class="fa-regular fa-envelope" style="font-size: 0.85rem;"></i>
+                                    </div>
+                                    <a href="mailto:@item.Email" class="text-decoration-none text-dark">@item.Email</a>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 fw-semibold">
+                                    <i class="fa-solid fa-check-circle me-1"></i> Active
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group shadow-sm">
+                                    <a href="/Course?lecturerFilter=@item.Id" class="btn btn-sm btn-outline-primary px-3 fw-semibold">
+                                        <i class="fa-solid fa-book-open me-1"></i> View Courses
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

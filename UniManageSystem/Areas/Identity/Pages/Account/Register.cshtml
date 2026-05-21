@@ -1,0 +1,84 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = null;
+    ViewData["IsAuthPage"] = true;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - UniManageSystem</title>
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!("theme" in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="auth-split-layout">
+        <!-- Right Side: Interaction Form (Reversed layout for Register) -->
+        <div class="auth-form-side">
+            <div class="auth-form-container">
+                <div class="auth-logo">
+                    <img src="~/images/logo.png" alt="UniManage Logo" />
+                    <h2>Create Account</h2>
+                    <p>Join the university management network</p>
+                </div>
+
+                <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 border-0 py-2 px-3 small" role="alert"></div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Email" class="form-control bg-light border-0" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                        <label asp-for="Input.Email" class="text-muted"><i class="fa-regular fa-envelope me-2"></i> Initializing Email</label>
+                        <span asp-validation-for="Input.Email" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Password" class="form-control bg-light border-0" autocomplete="new-password" aria-required="true" placeholder="password" />
+                        <label asp-for="Input.Password" class="text-muted"><i class="fa-solid fa-lock me-2"></i> Create Password</label>
+                        <span asp-validation-for="Input.Password" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <input asp-for="Input.ConfirmPassword" class="form-control bg-light border-0" autocomplete="new-password" aria-required="true" placeholder="password" />
+                        <label asp-for="Input.ConfirmPassword" class="text-muted"><i class="fa-solid fa-shield-check me-2"></i> Confirm Password</label>
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <button id="registerSubmit" type="submit" class="w-100 btn btn-lg auth-btn-gradient text-white rounded-pill py-3 fw-bold shadow-lg">Finalize Registration <i class="fa-solid fa-user-plus ms-2"></i></button>
+                    </div>
+                    
+                    <div class="text-center pt-3 mt-4 border-top">
+                        <p class="text-muted small mb-0">Already an active user?</p>
+                        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="fw-bold text-decoration-none">Authenticate instead</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Left Side: Image / Branding -->
+        <div class="auth-image-side" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.85) 0%, rgba(5, 150, 105, 0.95) 100%), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover;">
+            <div class="text-center">
+                <i class="fa-solid fa-users-rectangle" style="font-size: 5rem; color: rgba(255,255,255,0.9); margin-bottom: 1.5rem;"></i>
+                <h1 style="font-weight: 700; font-size: 3rem; letter-spacing: -1px; margin-bottom: 1rem;">Join the Community</h1>
+                <p style="font-size: 1.25rem; font-weight: 300; opacity: 0.9; max-width: 400px; margin: 0 auto;">Shape the future of global education networks effectively.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
+</body>
+</html>
